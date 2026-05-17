@@ -60,6 +60,24 @@ int main()
 
         cout << "Client connected\n";
 
+        // Basic HTTP response
+        string response =
+            "HTTP/1.1 200 OK\r\n"
+            "Content-Type: text/html\r\n"
+            "\r\n"
+            "<html>"
+            "<body>"
+            "<h1>Hello from C++ HTTP Server</h1>"
+            "</body>"
+            "</html>";
+
+        // Send response
+        send(clientSocket,
+             response.c_str(),
+             response.size(),
+             0);
+
+        // Close client connection
         close(clientSocket);
     }
 
