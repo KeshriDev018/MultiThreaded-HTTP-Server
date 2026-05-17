@@ -23,7 +23,7 @@ int main()
     serverAddress.sin_port = htons(8080);
     serverAddress.sin_addr.s_addr = INADDR_ANY;
 
-    // Bind socket to port
+    // Bind socket
     if (bind(serverSocket,
              (sockaddr *)&serverAddress,
              sizeof(serverAddress)) < 0)
@@ -60,16 +60,71 @@ int main()
 
         cout << "Client connected\n";
 
-        // Basic HTTP response
+        // Read HTTP request
+        char buffer[4096] = {0};
+
+        read(clientSocket, buffer, sizeof(buffer));
+
+        cout << "\n===== HTTP REQUEST =====\n";
+        cout << buffer << endl;
+
+        // Convert request into string
+        string request(buffer);
+
+        // Default route
+        string path = "/";
+
+        // Parse requested route
+        size_t methodEnd = request.find(" ");
+        size_t pathEnd = request.find(" ", methodEnd + 1);
+
+        if (methodEnd != string::npos &&
+            pathEnd != string::npos)
+        {
+            path = request.substr(
+                methodEnd + 1,
+                pathEnd - methodEnd - 1);
+        }
+
+        cout << "Requested Path: " << path << endl;
+
+        // Route handling
+        string html;
+
+        if (path == "/")
+        {
+            html =
+                "<html>"
+                "<body>"
+                "<h1>Home Page</h1>"
+                "</body>"
+                "</html>";
+        }
+        else if (path == "/about")
+        {
+            html =
+                "<html>"
+                "<body>"
+                "<h1>About Page</h1>"
+                "</body>"
+                "</html>";
+        }
+        else
+        {
+            html =
+                "<html>"
+                "<body>"
+                "<h1>404 Not Found</h1>"
+                "</body>"
+                "</html>";
+        }
+
+        // Build HTTP response
         string response =
             "HTTP/1.1 200 OK\r\n"
             "Content-Type: text/html\r\n"
-            "\r\n"
-            "<html>"
-            "<body>"
-            "<h1>Hello from C++ HTTP Server</h1>"
-            "</body>"
-            "</html>";
+            "\r\n" +
+            html;
 
         // Send response
         send(clientSocket,
