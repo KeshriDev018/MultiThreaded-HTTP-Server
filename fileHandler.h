@@ -7,4 +7,6 @@ using namespace std;
 
 string readFile(const string &filePath);
 
+string getMimeType(const string &path);
+
 #endif
