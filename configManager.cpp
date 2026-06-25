@@ -17,6 +17,8 @@ bool ConfigManager::loadConfig()
     }
 
     ifstream configFile("config.txt");
+    // Open config.txt for reading.
+
 
     // If config.txt doesn't exist, use defaults
     if (!configFile.is_open())
@@ -25,15 +27,21 @@ bool ConfigManager::loadConfig()
         return true; // Not an error, just use defaults
     }
 
+    // getline() is used to read an entire line of text from an input stream.
+    //Syntax
+    // getline(inputStream, stringVariable);
+    
     string line;
-    while (getline(configFile, line))
+    while (getline(configFile, line)) // Read File Line By Line
     {
         // Skip empty lines and comments
         if (line.empty() || line[0] == '#')
         {
             continue;
         }
-
+        
+        //size_t = unsigned int,cannot be negative
+        //npos = not found
         size_t delimPos = line.find('=');
         if (delimPos == string::npos)
         {
@@ -84,3 +92,12 @@ int ConfigManager::getPort()
     }
     return port;
 }
+
+// ConfigManager loads the port from config.txt.If the file is missing, invalid, or the port is invalid, it falls back to the default port(8080).Then getPort() returns the final port value to the server.
+
+//  ifstream stands for:Input File Stream
+// It is used to read data from a file.
+// Syntax :  ifstream file("config.txt");  or
+//  ifstream file;
+// file.open("config.txt");
+

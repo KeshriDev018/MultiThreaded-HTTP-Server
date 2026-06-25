@@ -1,5 +1,6 @@
 #include <iostream>
 #include <cstring>
+
 #include <unistd.h>
 #include <arpa/inet.h>
 #include <thread>
@@ -9,66 +10,17 @@
 #include "fileHandler.h"
 #include "rateLimiter.h"
 #include "configManager.h"
+#include "router.h"
 
 using namespace std;
 
 // Global rate limiter for all clients
 RateLimiter rateLimiter;
 
-/**
- * Handle route routing and file serving.
- * Returns: {filePath, statusCode, statusText}
- *
- * Routes:
- * GET / -> static/index.html
- * GET /about -> static/about.html
- * GET /style.css -> static/style.css
- * GET /* -> static/404.html (404)
- */
-struct RouteResult
-{
-    string filePath;
-    int statusCode;
-    string statusText;
-};
-
-RouteResult handleRoute(const string &path)
-{
-    if (path == "/")
-    {
-        return {"static/index.html", 200, "OK"};
-    }
-    else if (path == "/about")
-    {
-        return {"static/about.html", 200, "OK"};
-    }
-    else if (path == "/style.css")
-    {
-        return {"static/style.css", 200, "OK"};
-    }
-    else
-    {
-        // 404 Not Found
-        return {"static/404.html", 404, "Not Found"};
-    }
-}
-
-/**
- * Handle a single client connection
- * - Parse HTTP request
- * - Check rate limit
- * - Route request
- * - Send response
- * - Log request
- *
- * @param clientSocket - Socket file descriptor for client
- * @param clientIP - Client IP address
- */
 void handleClient(int clientSocket, string clientIP)
 {
     char buffer[4096] = {0};
 
-    // Read request from client
     ssize_t bytesRead = read(clientSocket, buffer, sizeof(buffer));
     if (bytesRead <= 0)
     {
@@ -199,11 +151,11 @@ int main()
         return 1;
     }
 
-    // Configure server address structure
-    sockaddr_in serverAddress;
-    serverAddress.sin_family = AF_INET;
+    // Configure server address structure hust like filling address form of socket
+    sockaddr_in serverAddress; // create socket addrress object
+    serverAddress.sin_family = AF_INET;//IPv4
     serverAddress.sin_port = htons(port);       // Convert port to network byte order
-    serverAddress.sin_addr.s_addr = INADDR_ANY; // Listen on all interfaces
+    serverAddress.sin_addr.s_addr = INADDR_ANY; // Listen on all interfaces/ip
 
     // Bind socket to address and port
     if (bind(serverSocket, (sockaddr *)&serverAddress, sizeof(serverAddress)) < 0)
@@ -225,7 +177,7 @@ int main()
     // Main event loop: accept and handle client connections
     while (true)
     {
-        sockaddr_in clientAddress;
+        sockaddr_in clientAddress; //
         socklen_t clientSize = sizeof(clientAddress);
 
         // Block until a client connects
@@ -236,6 +188,11 @@ int main()
             cerr << "[ERROR] Client connection failed\n";
             continue;
         }
+        /*
+        inet   = Internet
+          n      = Network
+          to     = To
+        a      = ASCII    it basically conver ip to string which human can understand */
 
         // Extract and log client IP address
         string clientIP = inet_ntoa(clientAddress.sin_addr);
@@ -243,6 +200,14 @@ int main()
 
         // Spawn a new thread to handle this client
         // This allows the server to handle multiple clients concurrently
+
+        /*here we are passing handleClient function as a parameter with its arguments client Socket and ClientIP ,the handleClient Function will be  executed ina a separate thread for every user separately, so the function would run with its argument in a separate threa,we did not ieve argumnts here because teh funcion would run immediately
+        thread object(funct,param1,param2,....)  so clientthread is a n object of the class
+
+        Create a new thread.Inside that thread run:
+        handleClient(clientSocket,clientIP);
+*/
+
         thread clientThread(handleClient, clientSocket, clientIP);
         clientThread.detach(); // Detach thread (it will clean up automatically)
     }

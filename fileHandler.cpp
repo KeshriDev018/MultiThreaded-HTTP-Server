@@ -5,6 +5,10 @@
 
 using namespace std;
 
+
+//Input: File path
+// Output: File contents
+
 string readFile(const string &filePath)
 {
 
@@ -15,12 +19,17 @@ string readFile(const string &filePath)
         return "";
     }
 
-    stringstream buffer;
+    stringstream buffer;// buffer is just a temporaray text container
 
-    buffer << file.rdbuf();
+    buffer << file.rdbuf(); // rdbuf is used to give all the contents of the file .so it means Take everything from file and Write it into buffer
 
-    return buffer.str();
+        return buffer.str(); // convert the text in string and return
 }
+
+
+
+//Its entire job is: File Name -> Tell browser what type of file it is
+
 
 string getMimeType(const string &path)
 {
